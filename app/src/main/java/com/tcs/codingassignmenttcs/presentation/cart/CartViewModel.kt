@@ -20,7 +20,7 @@ class CartViewModel @Inject constructor(
 
     val cartProductList: MutableState<DataState<List<Product>>?> = mutableStateOf(null)
 
-
+    
     fun getAllProducts() {
         viewModelScope.launch {
             cartRepository.getAllCartProduct()

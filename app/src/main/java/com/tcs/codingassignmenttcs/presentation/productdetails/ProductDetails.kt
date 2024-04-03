@@ -28,6 +28,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -58,56 +59,48 @@ fun ProductDetails(
     val productDetailsViewModel: ProductDetailsViewModel = hiltViewModel()
     val productDetail = productDetailsViewModel.productDetail
     val progressBar = remember { mutableStateOf(false) }
-    val addToCart = productDetailsViewModel.addToCartResult
-    val context = LocalContext.current
+    val product =  remember { mutableStateOf(Product()) }
+
     LaunchedEffect(true) {
         productDetailsViewModel.getProductDetails(productId!!)
     }
+    LaunchedEffect(productDetail.value) {
+        productDetail.value?.let { it ->
+            if (it is DataState.Success<Product>) {
+                product.value = it.data
+            }
+        }
+    }
+
+
     Scaffold(topBar = { ScaffoldWithTopBar(navController = navController) }) {
         Box(modifier = Modifier.padding(it)) {
             CircularIndeterminateProgressBar(isDisplayed = progressBar.value, 0.4f)
-            productDetail.value?.let { it ->
-                if (it is DataState.Success<Product>) {
-                    val productDetails = it.data
-                    Column(
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+            ) {
+                if(product.value!=null && product.value.title!=null) {
+                    ImageViewPager(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
-                    ) {
-                        ImageViewPager(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(300.dp),
-                            images = productDetails.images!!
-                        )
+                            .fillMaxWidth()
+                            .height(300.dp),
+                        images = product?.value?.images!!
+                    )
 
-                        productDetailsView(product = productDetails)
-                           addToCartButton(
-                            product = productDetails,
-                            productDetailsViewModel = productDetailsViewModel,
-                            navController
-                        )
-                        addToCart.value?.let { it ->
-                            if (it is DataState.Success<Long>) {
-                                val result = it.data
-                                if( result>0){
-                                    Toast.makeText(context, stringResource(id = R.string.added_to_cart), Toast.LENGTH_LONG).show()
-                                    navController.popBackStack()
-                                    navController.navigate(AppScreen.CartScreen.route)
-                                }
-                            }
-                        }
-
-
-                    }
+                    productDetailsView(product = product?.value!!)
+                    addToCartButton(
+                        product = product?.value!!,
+                        productDetailsViewModel = productDetailsViewModel,
+                        navController
+                    )
                 }
             }
-            productDetail.pagingLoadingState {
-                progressBar.value = it
-            }
-            addToCart.pagingLoadingState {
-                progressBar.value = it
-            }
+
+        }
+        productDetail.pagingLoadingState {
+            progressBar.value = it
         }
     }
 }
@@ -154,9 +147,25 @@ fun ImageViewPager(modifier: Modifier, images: List<String>) {
 fun addToCartButton(product: Product, productDetailsViewModel: ProductDetailsViewModel, navController: NavController) {
 
     val progressBar = remember { mutableStateOf(false) }
+    val addToCart = productDetailsViewModel.addToCartResult
+    val context = LocalContext.current
+    val text=stringResource(id = R.string.added_to_cart)
+    LaunchedEffect(key1 = addToCart.value) {
+        addToCart.value?.let { it ->
+            if (it is DataState.Success<Long>) {
+                val result = it.data
+                if( result>0){
+                    Toast.makeText(context, text, Toast.LENGTH_LONG).show()
+                    navController.popBackStack()
+                    navController.navigate(AppScreen.CartScreen.route)
+                }
+            }
+        }
+    }
 
-
-
+    addToCart.pagingLoadingState {
+        progressBar.value = it
+    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
