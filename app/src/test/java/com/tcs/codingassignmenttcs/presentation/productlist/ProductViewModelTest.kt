@@ -4,7 +4,11 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.paging.PagingData
 import com.tcs.codingassignmenttcs.domain.usecase.GetProductsUseCase
 import com.tcs.codingassignmenttcs.models.Product
+import com.tcs.codingassignmenttcs.repository.ProductDetailRepository
 import com.tcs.codingassignmenttcs.repository.ProductRepository
+import com.tcs.codingassignmenttcs.utils.DataState
+import io.mockk.coEvery
+import io.mockk.mockk
 import junit.framework.TestCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -28,14 +32,13 @@ class ProductViewModelTest{
 
     private lateinit var productViewModel: ProductViewModel
 
-    @Mock
     private lateinit var productRepository: ProductRepository
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Before
     fun setUp() {
         Dispatchers.setMain(Dispatchers.Default)
-        MockitoAnnotations.initMocks(this)
+        productRepository = mockk<ProductRepository>()
         productViewModel = ProductViewModel(
             getProductsUseCase = GetProductsUseCase(productRepository)
         )
@@ -49,7 +52,8 @@ class ProductViewModelTest{
                 Product(title = "perfume Oil", price = 13, brand = "Impression of Acqua Di Gio"),
             )
         )
-        Mockito.`when`(productRepository.getProducts()).thenReturn(flowOf(data))
+        coEvery{productRepository.getProducts()} returns flowOf(data)
+
         productViewModel.products.value = data
 
         val emittedData = productViewModel.products.first()

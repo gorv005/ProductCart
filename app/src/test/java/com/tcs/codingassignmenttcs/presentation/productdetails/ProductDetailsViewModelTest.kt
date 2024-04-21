@@ -2,8 +2,11 @@ package com.tcs.codingassignmenttcs.presentation.productdetails
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.tcs.codingassignmenttcs.models.Product
+import com.tcs.codingassignmenttcs.repository.CartRepository
 import com.tcs.codingassignmenttcs.repository.ProductDetailRepository
 import com.tcs.codingassignmenttcs.utils.DataState
+import io.mockk.coEvery
+import io.mockk.mockk
 import junit.framework.TestCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -27,7 +30,6 @@ class ProductDetailsViewModelTest {
 
     private lateinit var productDetailsViewModel: ProductDetailsViewModel
 
-    @Mock
     private lateinit var productDetailRepository: ProductDetailRepository
 
 
@@ -35,7 +37,8 @@ class ProductDetailsViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(Dispatchers.Default)
-        MockitoAnnotations.initMocks(this)
+        productDetailRepository = mockk<ProductDetailRepository>()
+
         productDetailsViewModel = ProductDetailsViewModel(
             productDetailRepository = productDetailRepository
         )
@@ -47,11 +50,8 @@ class ProductDetailsViewModelTest {
             val testdata =
                 Product(title = "perfume Oil", price = 13, brand = "Impression of Acqua Di Gio")
 
-            Mockito.`when`(
-                productDetailRepository.getProductDetail(
-                    1
-                )
-            ).thenReturn(flowOf(DataState.Success(testdata)))
+            coEvery{productDetailRepository.getProductDetail(1)} returns flowOf(DataState.Success(testdata))
+
             productDetailsViewModel.getProductDetails(1)
             delay(500)
 
@@ -72,11 +72,9 @@ class ProductDetailsViewModelTest {
             val testdata =
                 Product(title = "perfume Oil", price = 13, brand = "Impression of Acqua Di Gio")
 
-            Mockito.`when`(
-                productDetailRepository.addProductToCart(
-                    testdata
-                )
-            ).thenReturn(flowOf(DataState.Success(1)))
+
+            coEvery{productDetailRepository.addProductToCart(testdata)} returns flowOf(DataState.Success(1))
+
             productDetailsViewModel.addToCart(product = testdata)
             delay(500)
 

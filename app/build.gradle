@@ -105,6 +105,8 @@ dependencies {
     testImplementation "org.mockito.kotlin:mockito-kotlin:4.1.0"
     testImplementation 'org.mockito:mockito-core:5.4.0'
     androidTestImplementation 'org.mockito:mockito-android:5.4.0'
+    //Mockk
+    testImplementation (libs.mockk)
 
     testImplementation libs.junit
     androidTestImplementation libs.androidx.junit
