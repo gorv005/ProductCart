@@ -50,7 +50,11 @@ class ProductDetailsViewModelTest {
             val testdata =
                 Product(title = "perfume Oil", price = 13, brand = "Impression of Acqua Di Gio")
 
-            coEvery{productDetailRepository.getProductDetail(1)} returns flowOf(DataState.Success(testdata))
+            coEvery { productDetailRepository.getProductDetail(1) } returns flowOf(
+                DataState.Success(
+                    testdata
+                )
+            )
 
             productDetailsViewModel.getProductDetails(1)
             delay(500)
@@ -73,7 +77,11 @@ class ProductDetailsViewModelTest {
                 Product(title = "perfume Oil", price = 13, brand = "Impression of Acqua Di Gio")
 
 
-            coEvery{productDetailRepository.addProductToCart(testdata)} returns flowOf(DataState.Success(1))
+            coEvery { productDetailRepository.addProductToCart(testdata) } returns flowOf(
+                DataState.Success(
+                    1
+                )
+            )
 
             productDetailsViewModel.addToCart(product = testdata)
             delay(500)
